@@ -21,7 +21,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     # path('api/v1/', include('comments.urls')),
     # path('api/v1/', include('titles.urls')),
-    # path('api/v1/', include('users.urls')),
+    path('api/v1/', include('users.urls')),
     path(
         'redoc/',
         TemplateView.as_view(template_name='redoc.html'),
