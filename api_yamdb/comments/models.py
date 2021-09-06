@@ -1,7 +1,6 @@
+from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from django.db.models.deletion import CASCADE
-from django.core.validators import MaxValueValidator, MinValueValidator
-
 
 from titles.models import Title
 from users.models import User

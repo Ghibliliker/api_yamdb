@@ -2,8 +2,9 @@ from django.core.exceptions import ValidationError
 from rest_framework import serializers
 from rest_framework.generics import get_object_or_404
 
-from .models import Review, Comment
 from titles.models import Title
+from .models import Comment, Review
+
 
 class ReviewSerializer(serializers.ModelSerializer):
     title = serializers.SlugRelatedField(
@@ -30,7 +31,9 @@ class ReviewSerializer(serializers.ModelSerializer):
         author = self.context['request'].user
         title_id = self.context['view'].kwargs.get['title_id']
         title = get_object_or_404(Title, pk=title_id)
-        return Review.objects.create(title=title, author=author, **validated_data)
+        return Review.objects.create(
+            title=title, author=author, **validated_data
+        )
 
     class Meta:
         model = Review
@@ -55,4 +58,6 @@ class CommentSerializer(serializers.ModelSerializer):
         author = self.context['request'].user
         review_id = self.context['view'].kwargs.get['review_id']
         review = get_object_or_404(Review, pk=review_id)
-        return Comment.objects.create(review=review, author=author, **validated_data)
+        return Comment.objects.create(
+            review=review, author=author, **validated_data
+        )
