@@ -1,6 +1,13 @@
 from django.urls import path, include
 
+from rest_framework import routers
+
+from .views import YamdbTokenObtainPairView, UserViewSet
+
+router = routers.DefaultRouter()
+router.register(r"signup", UserViewSet)
+
 urlpatterns = [
-    path("", include("djoser.urls")),
-    path("", include("djoser.urls.jwt")),
+    path("auth/", include(router.urls)),
+    path("auth/token/", YamdbTokenObtainPairView.as_view()),
 ]
