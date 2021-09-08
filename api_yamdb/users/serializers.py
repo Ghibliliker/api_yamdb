@@ -3,6 +3,7 @@ from rest_framework import serializers
 from rest_framework.relations import StringRelatedField
 
 from .models import User
+from .confirmation_code import send_email_with_confirmation_code
 
 
 class UserSerializer(serializers.ModelSerializer):
