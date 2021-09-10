@@ -15,12 +15,15 @@ class ConfirmationCodeGenerator(PasswordResetTokenGenerator):
 confirmation_code = ConfirmationCodeGenerator()
 
 
-def send_email_with_confirmation_code(user):
-    conf_code = confirmation_code.make_token(user)
+def create_code(user):
+    return confirmation_code.make_token(user)
+
+
+def send_email_with_confirmation_code(code, email):
     send_mail(
         "Confirmation code",
-        conf_code,
+        code,
         "from@example.com",
-        [user.e_mail],
+        [email],
         fail_silently=False,
     )
