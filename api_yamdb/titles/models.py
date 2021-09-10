@@ -25,11 +25,18 @@ class Title(models.Model):
         validators=[MinValueValidator(-10000), MaxValueValidator(datetime.date.today().year)]
     )
     description = models.TextField(null=True, blank=True)
-    genre = models.ForeignKey(
-        Genre, on_delete=models.CASCADE, related_name='genre')
+    genre = models.ManyToManyField(Genre, through='GenreTitle')
     category = models.ForeignKey(
         Category, on_delete=models.CASCADE,
         related_name='category')
 
     def __str__(self):
         return self.name
+
+
+class GenreTitle(models.Model):
+    genre = models.ForeignKey(Genre, on_delete=models.CASCADE)
+    title = models.ForeignKey(Title, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return f'{self.genre} {self.title}'
