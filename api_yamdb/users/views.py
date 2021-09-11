@@ -14,7 +14,7 @@ from rest_framework import status
 from .models import User
 from .serializers import UserSerializerForCode, UserSerializer
 from .serializers import YamdbTokenSerializer
-from .permissions import IsRoleAdmin, IsRole
+# from .permissions import IsRoleAdmin, IsRole
 
 
 @api_view(["GET"])
