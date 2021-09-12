@@ -16,7 +16,7 @@ class Category(models.Model):
         validators=[SLUG_REGEX],
         unique=True,
         max_length=50
-    )  # ^[-a-zA-Z0-9_]+$  тест адекватности
+    )
 
     def __str__(self):
         return self.name
@@ -38,23 +38,15 @@ class Title(models.Model):
             MinValueValidator(-10000),
             MaxValueValidator(datetime.date.today().year)
         ]
-    )           # реализовать в сериализаторе?
+    )
     description = models.TextField(null=True, blank=True)
-    genre = models.ManyToManyField(Genre, through='GenreTitle')
+    genre = models.ManyToManyField(Genre)
     category = models.ForeignKey(
-        Category, on_delete=models.CASCADE,
-        related_name='category')
+        Category, on_delete=models.SET_NULL,
+        related_name='category', null=True)
 
     def __str__(self):
         return self.name
-
-
-class GenreTitle(models.Model):
-    genre = models.ForeignKey(Genre, on_delete=models.CASCADE)
-    title = models.ForeignKey(Title, on_delete=models.CASCADE)
-
-    def __str__(self):
-        return f'{self.genre} {self.title}'
 
 
 class Review(models.Model):

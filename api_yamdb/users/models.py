@@ -5,7 +5,7 @@ from .confirmation_code import create_code
 
 
 class UserManager(BaseUserManager):
-    def create_user(self, username, email, role="US", password=None):
+    def create_user(self, username, bio, email, role="US", password=None):
         print(f"create_user: email={email}, role={role}")
         if not username:
             raise ValueError('Users must have an username')
@@ -13,6 +13,7 @@ class UserManager(BaseUserManager):
             username=username,
             email=self.normalize_email(email),
             role=role,
+            bio=bio
         )
 
         conf_code = create_code(user)
@@ -25,12 +26,13 @@ class UserManager(BaseUserManager):
 
         return user
 
-    def create_superuser(self, username, email, password=None):
+    def create_superuser(self, username, bio, email, role="AD", password=None):
         print(f"create_superuser: email={email}")
         user = self.create_user(
             username,
             email=email,
-            role="AD",
+            role=role,
+            bio=bio
         )
         user.is_admin = True
         user.save(using=self._db)
