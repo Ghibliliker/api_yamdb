@@ -1,6 +1,8 @@
 from django.shortcuts import get_object_or_404
-from rest_framework import filters, viewsets
+from django.db.models import Avg
+from rest_framework import filters, viewsets, mixins
 from rest_framework.pagination import LimitOffsetPagination
+from django_filters import rest_framework as f
 from django_filters.rest_framework import DjangoFilterBackend
 
 from .permissions import AdminOrReadOnly, ReviewCommentPermission
@@ -8,21 +10,29 @@ from .serializers import (CategorySerializer,
                           GenreSerializer,
                           TitleSerializer,
                           CommentSerializer,
-                          ReviewSerializer)
+                          ReviewSerializer,
+                          TitleAdminSerializer)
 from reviews.models import Title, Genre, Category, Review
 
 
-class GenreViewSet(viewsets.ModelViewSet):
+class CreateListDestroyViewSet(mixins.CreateModelMixin,
+                               mixins.DestroyModelMixin,
+                               mixins.ListModelMixin,
+                               viewsets.GenericViewSet):
+    pass
+
+
+class GenreViewSet(CreateListDestroyViewSet):
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
     permission_classes = (AdminOrReadOnly,)
-    lookup_field = 'slug'                # тесты отображения только slug жанра
+    lookup_field = 'slug'
     pagination_class = LimitOffsetPagination
     filter_backends = (filters.SearchFilter,)
     search_fields = ('name',)
 
 
-class CategoryViewSet(viewsets.ModelViewSet):
+class CategoryViewSet(CreateListDestroyViewSet):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
     permission_classes = (AdminOrReadOnly,)
@@ -32,13 +42,32 @@ class CategoryViewSet(viewsets.ModelViewSet):
     search_fields = ('name',)
 
 
+class TitlesFilter(f.FilterSet):
+    category = f.CharFilter(
+        field_name='category__slug',
+        lookup_expr='icontains'
+    )
+    genre = f.CharFilter(field_name='genre__slug', lookup_expr='icontains')
+    name = f.CharFilter(field_name='name', lookup_expr='icontains')
+    year = f.CharFilter(field_name='year', lookup_expr='icontains')
+
+    class Meta:
+        model = Title
+        fields = ('category', 'genre', 'name', 'year')
+
+
 class TitleViewSet(viewsets.ModelViewSet):
-    queryset = Title.objects.all()
+    queryset = Title.objects.all().annotate(rating=Avg('reviews__score'))
     serializer_class = TitleSerializer
     permission_classes = (AdminOrReadOnly,)
     pagination_class = LimitOffsetPagination
     filter_backends = (DjangoFilterBackend,)
-    filterset_fields = ('category', 'genre', 'name', 'year')
+    filterset_class = TitlesFilter
+
+    def get_serializer_class(self):
+        if self.action in ['create', 'destroy', 'partial_update']:
+            return TitleAdminSerializer
+        return TitleSerializer
 
 
 class ReviewViewSet(viewsets.ModelViewSet):
