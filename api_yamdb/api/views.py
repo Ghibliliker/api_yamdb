@@ -1,9 +1,9 @@
 from django.shortcuts import get_object_or_404
+from django.db.models import Avg
 from rest_framework import filters, viewsets, mixins
 from rest_framework.pagination import LimitOffsetPagination
 from django_filters import rest_framework as f
 from django_filters.rest_framework import DjangoFilterBackend
-from django.db.models import Avg 
 
 from .permissions import AdminOrReadOnly, ReviewCommentPermission
 from .serializers import (CategorySerializer,
@@ -43,7 +43,10 @@ class CategoryViewSet(CreateListDestroyViewSet):
 
 
 class TitlesFilter(f.FilterSet):
-    category = f.CharFilter(field_name='category__slug', lookup_expr='icontains')
+    category = f.CharFilter(
+        field_name='category__slug',
+        lookup_expr='icontains'
+    )
     genre = f.CharFilter(field_name='genre__slug', lookup_expr='icontains')
     name = f.CharFilter(field_name='name', lookup_expr='icontains')
     year = f.CharFilter(field_name='year', lookup_expr='icontains')
@@ -60,7 +63,7 @@ class TitleViewSet(viewsets.ModelViewSet):
     pagination_class = LimitOffsetPagination
     filter_backends = (DjangoFilterBackend,)
     filterset_class = TitlesFilter
-    
+
     def get_serializer_class(self):
         if self.action in ['create', 'destroy', 'partial_update']:
             return TitleAdminSerializer
