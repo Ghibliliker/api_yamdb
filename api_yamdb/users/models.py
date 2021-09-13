@@ -1,55 +1,14 @@
-from django.contrib.auth.models import AbstractUser, BaseUserManager
+from django.contrib.auth.models import AbstractUser
 from django.db import models
-
-from .confirmation_code import create_code
-
-
-class UserManager(BaseUserManager):
-    def create_user(self, username, bio, email, role="US", password=None):
-        print(f"create_user: email={email}, role={role}")
-        if not username:
-            raise ValueError('Users must have an username')
-        user = self.model(
-            username=username,
-            email=self.normalize_email(email),
-            role=role,
-            bio=bio
-        )
-
-        conf_code = create_code(user)
-
-        user.save(using=self._db)
-
-        user.confirmation_code = conf_code
-
-        user.save(using=self._db)
-
-        return user
-
-    def create_superuser(self, username, bio, email, role="AD", password=None):
-        print(f"create_superuser: email={email}")
-        user = self.create_user(
-            username,
-            email=email,
-            role=role,
-            bio=bio
-        )
-        user.is_admin = True
-        user.save(using=self._db)
-        return user
 
 
 class User(AbstractUser):
-    USER = "US"
-    MODERATOR = "MO"
-    ADMIN = "AD"
-    ROLE_OF_USER_CHOICES = [
-        (USER, "user"),
-        (MODERATOR, "moderator"),
-        (ADMIN, "admin"),
-    ]
 
-    objects = UserManager()
+    ROLE_OF_USER_CHOICES = [
+        ("user", "user"),
+        ("moderator", "moderator"),
+        ("admin", "admin"),
+    ]
 
     email = models.EmailField(
         max_length=254,
@@ -61,17 +20,32 @@ class User(AbstractUser):
     bio = models.TextField(
         verbose_name="Биография",
         blank=True,
+        null=True,
     )
 
     role = models.CharField(
         verbose_name="Роль",
-        max_length=2,
+        max_length=9,
         choices=ROLE_OF_USER_CHOICES,
-        default=USER,
+        default="user",
     )
 
     confirmation_code = models.CharField(
-        verbose_name='Confirmation code',
         max_length=30,
         blank=True,
+        editable=False,
+        null=True,
+        unique=True
     )
+
+    @property
+    def is_user(self):
+        return self.role == "user"
+
+    @property
+    def is_moderator(self):
+        return self.role == "moderator"
+
+    @property
+    def is_admin(self):
+        return self.role == "admin"

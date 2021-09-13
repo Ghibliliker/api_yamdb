@@ -1,5 +1,4 @@
 from django.contrib import admin
-from django.contrib.auth.admin import UserAdmin
 
 from .models import User
 from reviews.models import Comment, Review, Title, Genre, Category
@@ -33,6 +32,17 @@ class CommentAdmin(admin.ModelAdmin):
     list_display = ('pk', 'reviews', 'author', 'text')
     search_fields = ('review', 'author', 'text')
     empty_value_display = '-пусто-'
+
+class UserAdmin(admin.ModelAdmin):
+    list_display = (
+        "username",
+        "email",
+        "first_name",
+        "confirmation_code",
+        "last_name",
+        "bio",
+        "role"
+    )
 
 
 admin.site.register(User, UserAdmin)
