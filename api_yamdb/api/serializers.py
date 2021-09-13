@@ -1,8 +1,4 @@
-# from api_yamdb.api.views import CategoryViewSet
-# from api_yamdb.reviews.models import GenreTitle
-# from typing_extensions import Required
 from django.core.exceptions import ValidationError
-# from django.db.models.query import QuerySet
 from rest_framework import serializers
 from rest_framework.generics import get_object_or_404
 

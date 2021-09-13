@@ -25,7 +25,7 @@ class CreateListDestroyViewSet(mixins.CreateModelMixin,
 class GenreViewSet(CreateListDestroyViewSet):
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
-    # permission_classes = (AdminOrReadOnly,)
+    permission_classes = (AdminOrReadOnly,)
     lookup_field = 'slug'
     pagination_class = LimitOffsetPagination
     filter_backends = (filters.SearchFilter,)
@@ -35,7 +35,7 @@ class GenreViewSet(CreateListDestroyViewSet):
 class CategoryViewSet(CreateListDestroyViewSet):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
-    # permission_classes = (AdminOrReadOnly,)
+    permission_classes = (AdminOrReadOnly,)
     lookup_field = 'slug'
     pagination_class = LimitOffsetPagination
     filter_backends = (filters.SearchFilter,)
@@ -56,7 +56,7 @@ class TitlesFilter(f.FilterSet):
 class TitleViewSet(viewsets.ModelViewSet):
     queryset = Title.objects.all().annotate(rating=Avg('reviews__score'))
     serializer_class = TitleSerializer
-    # permission_classes = (AdminOrReadOnly,)
+    permission_classes = (AdminOrReadOnly,)
     pagination_class = LimitOffsetPagination
     filter_backends = (DjangoFilterBackend,)
     filterset_class = TitlesFilter
