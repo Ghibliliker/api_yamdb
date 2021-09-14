@@ -14,9 +14,9 @@ from .serializers import (UserSerializerForCode, UsersSerializer,
                           YamdbTokenSerializer)
 
 
-@api_view(['GET', 'PATCH'])
+@api_view(['GET', 'PATCH'])  # noqa: C901
 @permission_classes((IsAuthenticated,))
-def get_me(request):  # noqa C901
+def get_me(request):  # noqa: C901
     if request.method == 'GET':
         user = request.user
 
@@ -31,7 +31,7 @@ def get_me(request):  # noqa C901
             }
         )
 
-    if request.method == 'PATCH':  # noqa
+    if request.method == 'PATCH':
         user = request.user
         if 'username' in request.data:
             if user.username != request.data['username']:
