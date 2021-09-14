@@ -1,8 +1,5 @@
-from django.core.exceptions import ValidationError
 from rest_framework import serializers
-from rest_framework.generics import get_object_or_404
-
-from reviews.models import Title, Genre, Category, Comment, Review
+from reviews.models import Category, Comment, Genre, Review, Title
 
 
 class GenreSerializer(serializers.ModelSerializer):
@@ -59,22 +56,15 @@ class ReviewSerializer(serializers.ModelSerializer):
     )
 
     def validate(self, data):
-        request = self.context['request']
-        author = request.user
-        title_id = self.context['view'].kwargs.get('title_id')
-        title = get_object_or_404(Title, pk=title_id)
-        if request.method == 'POST':
-            if Review.objects.filter(title=title, author=author).exists():
-                raise ValidationError('Можно оставить только один отзыв')
+        request = self.context.get('request')
+        if request.method != 'POST':
+            return data
+        title = self.context.get('view').kwargs.get('title_id')
+        if Review.objects.filter(author=request.user, title=title).exists():
+            raise serializers.ValidationError(
+                'Нельзя создавать больше одного обзора'
+            )
         return data
-
-    def create(self, validated_data):
-        author = self.context['request'].user
-        title_id = self.context['view'].kwargs.get['title_id']
-        title = get_object_or_404(Title, pk=title_id)
-        return Review.objects.create(
-            title=title, author=author, **validated_data
-        )
 
     class Meta:
         model = Review
@@ -94,11 +84,4 @@ class CommentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Comment
         fields = '__all__'
-
-    def create(self, validated_data):
-        author = self.context['request'].user
-        review_id = self.context['view'].kwargs.get['review_id']
-        review = get_object_or_404(Review, pk=review_id)
-        return Comment.objects.create(
-            review=review, author=author, **validated_data
-        )
+        read_only_fields = ('id', 'author', 'pub_date', 'review')

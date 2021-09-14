@@ -1,25 +1,19 @@
 from django.shortcuts import get_object_or_404
-from rest_framework_simplejwt.tokens import RefreshToken
-from rest_framework import viewsets
-from rest_framework.views import APIView
-from rest_framework.pagination import PageNumberPagination
-from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework import status, viewsets
 # from rest_framework.decorators import api_view, permission_classes, action
 from rest_framework.decorators import api_view, permission_classes
+from rest_framework.pagination import PageNumberPagination
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
-from rest_framework import status
+from rest_framework.views import APIView
+from rest_framework_simplejwt.tokens import RefreshToken
 
+from .confirmation_code import create_code, send_email_with_confirmation_code
 from .models import User
-from .serializers import UserSerializerForCode, UsersSerializer
-from .serializers import YamdbTokenSerializer
-from .permissions import (
-    IsRoleAdminOrOwner,
-    IsRoleOwner,
-    IsRoleAdmin,
-    IsRoleSuperUser,
-    IsRoleAdminOrSuperUser
-)
-from .confirmation_code import send_email_with_confirmation_code, create_code
+from .permissions import (IsRoleAdmin, IsRoleAdminOrOwner,
+                          IsRoleAdminOrSuperUser, IsRoleOwner, IsRoleSuperUser)
+from .serializers import (UserSerializerForCode, UsersSerializer,
+                          YamdbTokenSerializer)
 
 
 @api_view(["GET", "PATCH"])

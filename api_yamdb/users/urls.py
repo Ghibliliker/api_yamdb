@@ -1,9 +1,8 @@
-from django.urls import path, include
-
+from django.urls import include, path
 from rest_framework import routers
 
-from .views import SignUpViewSet, UsersViewSet, get_confirmation_code, get_me
-from .views import YamdbTokenViewSet
+from .views import (SignUpViewSet, UsersViewSet, YamdbTokenViewSet,
+                    get_confirmation_code, get_me)
 
 """router_auth = routers.DefaultRouter()
 router_auth.register(r"signup", SignUpViewSet.as_view(), basename="signup")"""

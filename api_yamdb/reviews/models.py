@@ -1,10 +1,9 @@
-from django.core.validators import (MaxValueValidator,
-                                    MinValueValidator,
+import datetime
+
+from django.core.validators import (MaxValueValidator, MinValueValidator,
                                     RegexValidator)
 from django.db import models
 from django.db.models.deletion import CASCADE
-import datetime
-
 from users.models import User
 
 SLUG_REGEX = RegexValidator(r'^[-a-zA-Z0-9_]+$', 'неподходящий "slug"')
@@ -75,10 +74,12 @@ class Review(models.Model):
 
     class Meta:
         ordering = ['-pub_date']
+        constraints = [models.UniqueConstraint(fields=['author', 'title'],
+                       name='1_review_per_author')]
 
 
 class Comment(models.Model):
-    reviews = models.ForeignKey(
+    review = models.ForeignKey(
         Review,
         on_delete=models.CASCADE,
         verbose_name='comment review',

@@ -1,9 +1,9 @@
 from django.shortcuts import get_object_or_404
-from rest_framework.exceptions import ValidationError
 from rest_framework import serializers
+from rest_framework.exceptions import ValidationError
 
+from .confirmation_code import create_code, send_email_with_confirmation_code
 from .models import User
-from .confirmation_code import send_email_with_confirmation_code, create_code
 
 
 class UsersSerializer(serializers.ModelSerializer):
