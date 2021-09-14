@@ -1,6 +1,6 @@
 from django.contrib import admin
-from reviews.models import Category, Comment, Genre, Review, Title
 
+from reviews.models import Category, Comment, Genre, Review, Title
 from .models import User
 
 
@@ -36,13 +36,13 @@ class CommentAdmin(admin.ModelAdmin):
 
 class UserAdmin(admin.ModelAdmin):
     list_display = (
-        "username",
-        "email",
-        "first_name",
-        "confirmation_code",
-        "last_name",
-        "bio",
-        "role"
+        'username',
+        'email',
+        'first_name',
+        'confirmation_code',
+        'last_name',
+        'bio',
+        'role'
     )
 
 

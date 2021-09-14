@@ -21,9 +21,9 @@ def create_code(user):
 
 def send_email_with_confirmation_code(code, email):
     send_mail(
-        "Confirmation code",
+        'Confirmation code',
         code,
-        "from@example.com",
+        'from@example.com',
         [email],
         fail_silently=False,
     )
