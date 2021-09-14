@@ -6,56 +6,39 @@
 ​
 ​
 ### Как запустить проект:
-​
-​
 1. Клонировать репозиторий и перейти в него в командной строке:
-​
 ```
 git clone https://github.com/yandex-praktikum/api_yamdb.git
 ```
-​
 ```
 cd api_yamdb
 ```
-​
 2. Cоздать и активировать виртуальное окружение:
-​
 ```
 python -m venv venv
 ```
-​
 ```
 source venv/scripts/activate
 ```
-​
 ```
 python -m pip install --upgrade pip
 ```
-​
 3. Установить зависимости из файла requirements.txt:
-​
 ```
 pip install -r requirements.txt
 ```
-​
 4. Подготовить миграции:
-​
 ```
 python manage.py makemigrations
 ```
-​
 5. Выполнить миграции:
-​
 ```
 python manage.py migrate
 ```
-​
 6. Запустить проект:
-​
 ```
 python manage.py runserver
 ```
-​
 ### Эндпоинты, поддерживаемые API:
 
 * POST /api/v1/auth/signup/    Регистрация нового пользователя
