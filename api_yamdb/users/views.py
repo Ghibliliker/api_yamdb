@@ -14,66 +14,65 @@ from .serializers import (UserSerializerForCode, UsersSerializer,
                           YamdbTokenSerializer)
 
 
-@api_view(['GET', 'PATCH'])  # noqa: C901
-@permission_classes((IsAuthenticated,))  # noqa: C901
-def get_me(request):  # noqa: C901
-    if request.method == 'GET':  # noqa: C901
-        user = request.user  # noqa: C901
+def get_me_get(request):
+    user = request.user
+    return Response({'username': user.username,
+                     'email': user.email,
+                     'first_name': user.first_name,
+                     'last_name': user.last_name,
+                     'bio': user.bio,
+                     'role': user.role})
 
-        return Response(  # noqa: C901
-            {  # noqa: C901
-                'username': user.username,  # noqa: C901
-                'email': user.email,  # noqa: C901
-                'first_name': user.first_name,  # noqa: C901
-                'last_name': user.last_name,  # noqa: C901
-                'bio': user.bio,  # noqa: C901
-                'role': user.role,  # noqa: C901
-            }  # noqa: C901
-        )  # noqa: C901
 
-    if request.method == 'PATCH':  # noqa: C901
-        user = request.user  # noqa: C901
-        if 'username' in request.data:  # noqa: C901
-            if user.username != request.data['username']:  # noqa: C901
-                if not User.objects.filter(  # noqa: C901
-                    username=request.data['username']  # noqa: C901
-                ) is None:  # noqa: C901
-                    return Response(  # noqa: C901
-                        {'username': request.data['username']},  # noqa: C901
-                        status=status.HTTP_400_BAD_REQUEST  # noqa: C901
-                    )  # noqa: C901
-            user.username = request.data['username']  # noqa: C901
+def get_me_patch(request):
+    user = request.user
+    if 'username' in request.data:
+        if user.username != request.data['username']:
+            if not User.objects.filter(
+                username=request.data['username']
+            ) is None:
+                return Response(
+                    {'username': request.data['username']},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+        user.username = request.data['username']
 
-        if 'email' in request.data:  # noqa: C901
-            if user.email != request.data['email']:  # noqa: C901
-                if not User.objects.filter(  # noqa: C901
-                    email=request.data['email']  # noqa: C901
-                ) is None:  # noqa: C901
-                    return Response(  # noqa: C901
-                        {'email': request.data['email']},  # noqa: C901
-                        status=status.HTTP_400_BAD_REQUEST  # noqa: C901
-                    )  # noqa: C901
-            user.email = request.data['email']  # noqa: C901
+    if 'email' in request.data:
+        if user.email != request.data['email']:
+            if not User.objects.filter(
+                email=request.data['email']
+            ) is None:
+                return Response(
+                    {'email': request.data['email']},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+        user.email = request.data['email']
 
-        if 'first_name' in request.data:  # noqa: C901
-            user.first_name = request.data['first_name']  # noqa: C901
-        if 'last_name' in request.data:  # noqa: C901
-            user.last_name = request.data['last_name']  # noqa: C901
-        if 'bio' in request.data:  # noqa: C901
-            user.bio = request.data['bio']  # noqa: C901
+    if 'first_name' in request.data:
+        user.first_name = request.data['first_name']
+    if 'last_name' in request.data:
+        user.last_name = request.data['last_name']
+    if 'bio' in request.data:
+        user.bio = request.data['bio']
 
-        user.save()  # noqa: C901
+    user.save()
 
-        return Response(  # noqa: C901
-            {  # noqa: C901
-                'username': user.username,  # noqa: C901
-                'email': user.email,  # noqa: C901
-                'first_name': user.first_name,  # noqa: C901
-                'last_name': user.last_name,  # noqa: C901
-                'bio': user.bio,  # noqa: C901
-                'role': user.role,  # noqa: C901
-            }  # noqa: C901
-        )  # noqa: C901
+    return Response({'username': user.username,
+                     'email': user.email,
+                     'first_name': user.first_name,
+                     'last_name': user.last_name,
+                     'bio': user.bio,
+                     'role': user.role})
+
+
+@api_view(['GET', 'PATCH'])
+@permission_classes((IsAuthenticated,))
+def get_me(request):
+    if request.method == 'GET':
+        return get_me_get(request)
+
+    if request.method == 'PATCH':
+        return get_me_patch(request)
 
 
 @api_view(['GET'])
