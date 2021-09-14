@@ -16,7 +16,7 @@ from .serializers import (UserSerializerForCode, UsersSerializer,
 
 @api_view(['GET', 'PATCH'])
 @permission_classes((IsAuthenticated,))
-def get_me(request): # noqa
+def get_me(request):  # noqa C901
     if request.method == 'GET':
         user = request.user
 
@@ -31,7 +31,7 @@ def get_me(request): # noqa
             }
         )
 
-    if request.method == 'PATCH': # noqa
+    if request.method == 'PATCH':  # noqa
         user = request.user
         if 'username' in request.data:
             if user.username != request.data['username']:
