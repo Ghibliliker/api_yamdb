@@ -1,8 +1,7 @@
 from django.db.models import Avg
 from django.shortcuts import get_object_or_404
-from django_filters import rest_framework as f
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import filters, mixins, viewsets
+from rest_framework import filters, viewsets
 from rest_framework.pagination import LimitOffsetPagination
 
 from reviews.models import Category, Genre, Review, Title
@@ -10,13 +9,8 @@ from .permissions import AdminOrReadOnly, ReviewCommentPermission
 from .serializers import (CategorySerializer, CommentSerializer,
                           GenreSerializer, ReviewSerializer,
                           TitleAdminSerializer, TitleSerializer)
-
-
-class CreateListDestroyViewSet(mixins.CreateModelMixin,
-                               mixins.DestroyModelMixin,
-                               mixins.ListModelMixin,
-                               viewsets.GenericViewSet):
-    pass
+from .mixins import CreateListDestroyViewSet
+from .filters import TitlesFilter
 
 
 class GenreViewSet(CreateListDestroyViewSet):
@@ -37,20 +31,6 @@ class CategoryViewSet(CreateListDestroyViewSet):
     pagination_class = LimitOffsetPagination
     filter_backends = (filters.SearchFilter,)
     search_fields = ('name',)
-
-
-class TitlesFilter(f.FilterSet):
-    category = f.CharFilter(
-        field_name='category__slug',
-        lookup_expr='icontains'
-    )
-    genre = f.CharFilter(field_name='genre__slug', lookup_expr='icontains')
-    name = f.CharFilter(field_name='name', lookup_expr='icontains')
-    year = f.CharFilter(field_name='year', lookup_expr='icontains')
-
-    class Meta:
-        model = Title
-        fields = ('category', 'genre', 'name', 'year')
 
 
 class TitleViewSet(viewsets.ModelViewSet):
