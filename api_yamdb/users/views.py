@@ -1,6 +1,7 @@
 from django.shortcuts import get_object_or_404
 from rest_framework import status, viewsets
 from rest_framework.decorators import api_view, permission_classes
+from rest_framework.decorators import action
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
@@ -9,76 +10,23 @@ from rest_framework_simplejwt.tokens import RefreshToken
 
 from .confirmation_code import create_code, send_email_with_confirmation_code
 from .models import User
-from .permissions import IsRoleAdmin, IsRoleAdminOrSuperUser
+from .permissions import GlobalPermission
 from .serializers import (UserSerializerForCode, UsersSerializer,
-                          YamdbTokenSerializer)
-
-
-def get_me_get(request):
-    user = request.user
-    return Response({'username': user.username,
-                     'email': user.email,
-                     'first_name': user.first_name,
-                     'last_name': user.last_name,
-                     'bio': user.bio,
-                     'role': user.role})
-
-
-def get_me_patch(request):
-    user = request.user
-    if 'username' in request.data:
-        if user.username != request.data['username']:
-            if not User.objects.filter(
-                username=request.data['username']
-            ) is None:
-                return Response(
-                    {'username': request.data['username']},
-                    status=status.HTTP_400_BAD_REQUEST
-                )
-        user.username = request.data['username']
-
-    if 'email' in request.data:
-        if user.email != request.data['email']:
-            if not User.objects.filter(
-                email=request.data['email']
-            ) is None:
-                return Response(
-                    {'email': request.data['email']},
-                    status=status.HTTP_400_BAD_REQUEST
-                )
-        user.email = request.data['email']
-
-    if 'first_name' in request.data:
-        user.first_name = request.data['first_name']
-    if 'last_name' in request.data:
-        user.last_name = request.data['last_name']
-    if 'bio' in request.data:
-        user.bio = request.data['bio']
-
-    user.save()
-
-    return Response({'username': user.username,
-                     'email': user.email,
-                     'first_name': user.first_name,
-                     'last_name': user.last_name,
-                     'bio': user.bio,
-                     'role': user.role})
-
-
-@api_view(['GET', 'PATCH'])
-@permission_classes((IsAuthenticated,))
-def get_me(request):
-    if request.method == 'GET':
-        return get_me_get(request)
-
-    if request.method == 'PATCH':
-        return get_me_patch(request)
+                          YamdbTokenSerializer, MeSerializer)
 
 
 @api_view(['GET'])
 @permission_classes((AllowAny,))
 def get_confirmation_code(request):
+    if ('username' not in request.data) or (request.data['username'] is None):
+        return Response(
+            {'username': 'is empty'},
+            status=status.HTTP_400_BAD_REQUEST)
     user_name = request.data['username']
+    if ('email' not in request.data) or (request.data['email'] is None):
+        return Response(
+            {'email': 'is empty'},
+            status=status.HTTP_400_BAD_REQUEST)
     e_mail = request.data['email']
     user = get_object_or_404(User, username=user_name, email=e_mail)
     if user.confirmation_code is None:
@@ -102,15 +50,47 @@ class SignUpViewSet(APIView):
 
         serializer = UserSerializerForCode(data=request.data)
 
-        if serializer.is_valid():
-            user = serializer.save()
-            code = create_code(user)
-            send_email_with_confirmation_code(code, user.email)
-            user.confirmation_code = code
+        if serializer.is_valid(raise_exception=True):
             serializer.save()
-            return Response(serializer.data, status=status.HTTP_200_OK)
+            return Response(
+                serializer.validated_data,
+                status=status.HTTP_200_OK
+            )
 
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class MeViewSet(viewsets.ModelViewSet):
+    queryset = User.objects.all().order_by('username')
+    serializer_class = MeSerializer
+    lookup_field = 'username'
+    permission_classes = (IsAuthenticated,)
+
+    @action(
+        detail=True,
+        methods=['get', 'patch'],
+        permission_classes=[IsAuthenticated],
+    )
+    def me(self, request):
+        user = self.request.user
+        if request.method == 'GET':
+            serializer = self.get_serializer(user)
+            return Response(
+                serializer.data,
+                status=status.HTTP_200_OK
+            )
+
+        if request.method == 'PATCH':
+            user = self.request.user
+            serializer = self.get_serializer(
+                user,
+                data=request.data,
+                partial=True
+            )
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+            return Response(
+                serializer.data,
+                status=status.HTTP_200_OK
+            )
 
 
 class UsersViewSet(viewsets.ModelViewSet):
@@ -118,23 +98,7 @@ class UsersViewSet(viewsets.ModelViewSet):
     serializer_class = UsersSerializer
     pagination_class = PageNumberPagination
     lookup_field = 'username'
-
-    def get_permissions(self):
-        if self.action == 'list':
-            permission_classes = [IsRoleAdmin]
-        elif self.action == 'create':
-            permission_classes = [IsRoleAdminOrSuperUser]
-        elif self.action == 'retrieve':
-            permission_classes = [IsRoleAdmin]
-        elif self.action == 'update':
-            permission_classes = [IsRoleAdmin]
-        elif self.action == 'partial_update':
-            permission_classes = [IsRoleAdmin]
-        elif self.action == 'destroy':
-            permission_classes = [IsRoleAdminOrSuperUser]
-        else:
-            permission_classes = [IsAuthenticated]
-        return [permission() for permission in permission_classes]
+    permission_classes = [GlobalPermission]
 
 
 class YamdbTokenViewSet(APIView):
@@ -142,12 +106,10 @@ class YamdbTokenViewSet(APIView):
 
     def post(self, request):
         serializer = YamdbTokenSerializer(data=request.data)
-        if serializer.is_valid():
+        if serializer.is_valid(raise_exception=True):
             user = get_object_or_404(
                 User,
-                username=serializer.data['username']
+                username=serializer.validated_data['username']
             )
             refresh = RefreshToken.for_user(user)
             return Response({'token': str(refresh.access_token)})
-
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
