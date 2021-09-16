@@ -1,6 +1,5 @@
 from django.core.exceptions import ValidationError
-from django.core.validators import (MaxValueValidator, MinValueValidator,
-                                    RegexValidator)
+from django.core.validators import RegexValidator
 from django.db import models
 from django.db.models.deletion import CASCADE
 from django.utils import timezone
@@ -15,6 +14,14 @@ def year_validator(value):
     if value < 1 or value > timezone.now().year:
         raise ValidationError(
             _('%(value)s is not a correcrt year!'),
+            params={'value': value},
+        )
+
+
+def raiting_validator(value):
+    if value < 1 or value > 10:
+        raise ValidationError(
+            _('%(value)s is not a correcrt raiting!'),
             params={'value': value},
         )
 
@@ -83,7 +90,7 @@ class Review(models.Model):
     )
     text = models.TextField(
         'review text',
-        help_text='Напишите текст'
+        help_text='Напишите текст',
     )
     author = models.ForeignKey(
         User,
@@ -93,7 +100,7 @@ class Review(models.Model):
     )
     score = models.IntegerField(
         'review score',
-        validators=[MinValueValidator(1), MaxValueValidator(10)]
+        validators=[raiting_validator]
     )
     pub_date = models.DateTimeField('review date', auto_now_add=True)
 
@@ -101,6 +108,8 @@ class Review(models.Model):
         ordering = ['-pub_date']
         constraints = [models.UniqueConstraint(fields=['author', 'title'],
                        name='1_review_per_author')]
+        verbose_name = 'Review'
+        verbose_name_plural = 'Reviews'
 
 
 class Comment(models.Model):
@@ -113,7 +122,7 @@ class Comment(models.Model):
     text = models.TextField(
         'comment text',
         blank=False,
-        help_text='Напишите комментарий'
+        help_text='Напишите комментарий',
     )
     author = models.ForeignKey(
         User,
@@ -125,3 +134,5 @@ class Comment(models.Model):
 
     class Meta:
         ordering = ['-pub_date']
+        verbose_name = 'Comment'
+        verbose_name_plural = 'Comments'
