@@ -31,7 +31,7 @@ class User(AbstractUser):
         verbose_name='Роль',
         max_length=9,
         choices=ROLE_OF_USER_CHOICES,
-        default='user',
+        default=self.USER,
     )
 
     confirmation_code = models.CharField(
