@@ -1,29 +1,11 @@
-from django.core.exceptions import ValidationError
 from django.core.validators import RegexValidator
 from django.db import models
 from django.db.models.deletion import CASCADE
-from django.utils import timezone
-from django.utils.translation import gettext_lazy as _
 
 from users.models import User
+from .validators import raiting_validator, year_validator
 
 SLUG_REGEX = RegexValidator(r'^[-a-zA-Z0-9_]+$', 'неподходящий "slug"')
-
-
-def year_validator(value):
-    if value < 1 or value > timezone.now().year:
-        raise ValidationError(
-            _('%(value)s is not a correcrt year!'),
-            params={'value': value},
-        )
-
-
-def raiting_validator(value):
-    if value < 1 or value > 10:
-        raise ValidationError(
-            _('%(value)s is not a correcrt raiting!'),
-            params={'value': value},
-        )
 
 
 class Category(models.Model):

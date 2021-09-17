@@ -1,8 +1,7 @@
 from django.contrib.auth.tokens import PasswordResetTokenGenerator
 from django.core.mail import send_mail
 from django.utils import six
-
-from .settings import EMAIL_ADMIN
+from django.conf import settings
 
 
 class ConfirmationCodeGenerator(PasswordResetTokenGenerator):
@@ -25,7 +24,7 @@ def send_email_with_confirmation_code(code, email):
     send_mail(
         'Confirmation code',
         code,
-        EMAIL_ADMIN,
+        settings.EMAIL_ADMIN,
         [email],
         fail_silently=False,
     )

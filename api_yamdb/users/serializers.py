@@ -19,19 +19,6 @@ class UsersSerializer(serializers.ModelSerializer):
             'role'
         )
 
-
-class MeSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = User
-        fields = (
-            'username',
-            'email',
-            'first_name',
-            'last_name',
-            'bio',
-            'role'
-        )
-
     def validate(self, data):
         user = self.context['request'].user
         if user.is_user and ('role' in data):
@@ -51,10 +38,7 @@ class UserSerializerForCode(serializers.ModelSerializer):
     )
 
     class Meta:
-        fields = (
-            'username',
-            'email',
-        )
+        fields = ('username', 'email')
         model = User
 
     def validate_username(self, value):
@@ -84,3 +68,12 @@ class YamdbTokenSerializer(serializers.Serializer):
         if user.confirmation_code != data['confirmation_code']:
             raise ValidationError('Wrong confirmation_code')
         return data
+
+
+class ConfirmationCodeSerializer(serializers.Serializer):
+    username = serializers.CharField(required=True,)
+    email = serializers.EmailField(required=True,)
+
+    class Meta:
+        fields = ('username', 'email')
+        model = User
